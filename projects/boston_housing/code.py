@@ -55,14 +55,8 @@ def shuffle_split_data(X, y):
     then returns the training and testing subsets. """
     
     # Shuffle and split the data
-    X, y = shuffle(X, y, random_state=0)
-    features_train, features_test, labels_train, labels_test = cross_validation.train_test_split(
-        X, y, test_size = 0.3, random_state = 0)
-    
-    X_train = features_train
-    y_train = labels_train
-    X_test = features_test
-    y_test = labels_test
+    X_train, X_test, y_train, y_test = cross_validation.train_test_split(
+        X, y, test_size = 0.3)
     
     # Return the training and testing data subsets
     return X_train, y_train, X_test, y_test
@@ -74,3 +68,19 @@ try:
     print "Successfully shuffled and split the data!"
 except:
     print "Something went wrong with shuffling and splitting the data."
+
+from sklearn import metrics
+
+def performance_metric(y_true, y_predict):
+    """ Calculates and returns the total error between true and predicted values
+    based on a performance metric chosen by the student. """
+    
+    error = metrics.mean_squared_error(y_true, y_predict)
+    return error
+
+# Test performance_metric
+try:
+    total_error = performance_metric(y_train, y_train)
+    print "Successfully performed a metric calculation!"
+except:
+    print "Something went wrong with performing a metric calculation."
