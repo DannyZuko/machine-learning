@@ -101,7 +101,7 @@ def fit_model(X, y):
     parameters = {'max_depth':(1,2,3,4,5,6,7,8,9,10)}
     
     # Make an appropriate scoring function
-    scoring_function = metrics.make_scorer(metrics.mean_squared_error)
+    scoring_function = metrics.make_scorer(metrics.mean_squared_error, greater_is_better=False)
     
     # Make the GridSearchCV object
     reg = grid_search.GridSearchCV(regressor, parameters, scoring=scoring_function)
