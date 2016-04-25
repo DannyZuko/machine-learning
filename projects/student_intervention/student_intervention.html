@@ -951,6 +951,7 @@ F1 score for test set: 0.829931972789
 <h4 id="Given-what-you-know-about-the-data-so-far,-why-did-you-choose-this-model-to-apply?">Given what you know about the data so far, why did you choose this model to apply?<a class="anchor-link" href="#Given-what-you-know-about-the-data-so-far,-why-did-you-choose-this-model-to-apply?">&#182;</a></h4><ul>
 <li>I chose this model because it is effective in high dimensional spaces like our dataset and at the same time the number of dimensions of ourdataset is by far smaller than the number of our training set, which should erase the risk of poor performance due to too high dimensions with respect to size of sample. Moreover, it is a model known for memory efficiency, which is one of the constraints we have.</li>
 </ul>
+<p>(Source: sklearn documentation)</p>
 
 </div>
 </div>
@@ -969,6 +970,7 @@ F1 score for test set: 0.829931972789
 </ul>
 <p>Let’s say you had to determine whether a home is in San Francisco or in New York. Since San Francisco is relatively hilly, the elevation of a home may be a good way to distinguish the two cities. you could argue that a home above 240 ft should be classified as one in San Francisco. Adding another dimension allows for more nuance. For example, New York apartments can be extremely expensive per square foot. Of course, you’ll need additional information to distinguish homes with lower elevations and lower per-square-foot prices.</p>
 <p>The point of a decision tree is to automate the process of categorizing whether our students are likely to belong to the set of those who succeed or to the set of those who fail. A decision tree automatically finds out the most relevant features and combinations of features that differentiate the students who succeed from those who fail.</p>
+<p>(Source for housing example: <a href="http://www.r2d3.us/visual-intro-to-machine-learning-part-1/">http://www.r2d3.us/visual-intro-to-machine-learning-part-1/</a>)</p>
 <ul>
 <li>Fine-tune the model. Use Gridsearch with at least one important parameter tuned and with at least 3 settings. Use the entire training set for this.</li>
 <li>What is the model's final F<sub>1</sub> score?</li>
