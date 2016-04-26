@@ -213,7 +213,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Import libraries</span>
@@ -228,7 +228,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Read student data</span>
@@ -276,7 +276,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO: Compute desired values - replace each &#39;?&#39; with an appropriate expression/function call</span>
@@ -330,7 +330,7 @@ Graduation rate of the class: 67.09%
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Extract feature (X) and target (y) columns</span>
@@ -404,7 +404,7 @@ Feature values:-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Preprocess feature columns</span>
@@ -462,7 +462,7 @@ Feature values:-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># First, decide how many training vs test samples you want</span>
@@ -523,7 +523,7 @@ Test set: 95 samples
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Train a model</span>
@@ -568,7 +568,7 @@ Training time (secs): 0.004
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Predict on training set and compute F1 score</span>
@@ -598,7 +598,7 @@ Training time (secs): 0.004
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>Predicting labels using DecisionTreeClassifier...
 Done!
-Prediction time (secs): 0.000
+Prediction time (secs): 0.001
 F1 score for training set: 1.0
 </pre>
 </div>
@@ -610,7 +610,7 @@ F1 score for training set: 1.0
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Predict on test data</span>
@@ -630,7 +630,7 @@ F1 score for training set: 1.0
 <pre>Predicting labels using DecisionTreeClassifier...
 Done!
 Prediction time (secs): 0.001
-F1 score for test set: 0.733333333333
+F1 score for test set: 0.740157480315
 </pre>
 </div>
 </div>
@@ -641,7 +641,7 @@ F1 score for test set: 0.733333333333
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Train and predict using different training set sizes</span>
@@ -689,43 +689,43 @@ F1 score for test set: 0.733333333333
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>------------------------------------------
 Training set size: 100
-Training SVC...
+Training DecisionTreeClassifier...
 Done!
 Training time (secs): 0.002
-Predicting labels using SVC...
+Predicting labels using DecisionTreeClassifier...
 Done!
 Prediction time (secs): 0.001
-F1 score for training set: 0.872727272727
-Predicting labels using SVC...
+F1 score for training set: 1.0
+Predicting labels using DecisionTreeClassifier...
 Done!
-Prediction time (secs): 0.001
-F1 score for test set: 0.797297297297
+Prediction time (secs): 0.000
+F1 score for test set: 0.728682170543
 ------------------------------------------
 Training set size: 200
-Training SVC...
+Training DecisionTreeClassifier...
 Done!
-Training time (secs): 0.006
-Predicting labels using SVC...
+Training time (secs): 0.003
+Predicting labels using DecisionTreeClassifier...
 Done!
-Prediction time (secs): 0.005
-F1 score for training set: 0.851735015773
-Predicting labels using SVC...
+Prediction time (secs): 0.000
+F1 score for training set: 1.0
+Predicting labels using DecisionTreeClassifier...
 Done!
-Prediction time (secs): 0.003
-F1 score for test set: 0.810810810811
+Prediction time (secs): 0.000
+F1 score for test set: 0.655462184874
 ------------------------------------------
 Training set size: 300
-Training SVC...
+Training DecisionTreeClassifier...
 Done!
-Training time (secs): 0.012
-Predicting labels using SVC...
+Training time (secs): 0.004
+Predicting labels using DecisionTreeClassifier...
 Done!
-Prediction time (secs): 0.009
-F1 score for training set: 0.853002070393
-Predicting labels using SVC...
+Prediction time (secs): 0.001
+F1 score for training set: 1.0
+Predicting labels using DecisionTreeClassifier...
 Done!
-Prediction time (secs): 0.003
-F1 score for test set: 0.778523489933
+Prediction time (secs): 0.000
+F1 score for test set: 0.761904761905
 </pre>
 </div>
 </div>
@@ -736,7 +736,7 @@ F1 score for test set: 0.778523489933
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO: Train and predict using two other models</span>
@@ -811,11 +811,11 @@ Training time (secs): 0.003
 Predicting labels using GaussianNB...
 Done!
 Prediction time (secs): 0.001
-F1 score for training set: 0.875816993464
+F1 score for training set: 0.82962962963
 Predicting labels using GaussianNB...
 Done!
 Prediction time (secs): 0.001
-F1 score for test set: 0.87012987013
+F1 score for test set: 0.752
 ------------------------------------------
 Training set size: 200
 Training GaussianNB...
@@ -824,11 +824,11 @@ Training time (secs): 0.002
 Predicting labels using GaussianNB...
 Done!
 Prediction time (secs): 0.001
-F1 score for training set: 0.824742268041
+F1 score for training set: 0.790874524715
 Predicting labels using GaussianNB...
 Done!
-Prediction time (secs): 0.000
-F1 score for test set: 0.730158730159
+Prediction time (secs): 0.001
+F1 score for test set: 0.745762711864
 ------------------------------------------
 Training set size: 300
 Training GaussianNB...
@@ -837,37 +837,37 @@ Training time (secs): 0.002
 Predicting labels using GaussianNB...
 Done!
 Prediction time (secs): 0.001
-F1 score for training set: 0.78431372549
+F1 score for training set: 0.807600950119
 Predicting labels using GaussianNB...
 Done!
 Prediction time (secs): 0.001
-F1 score for test set: 0.746268656716
+F1 score for test set: 0.744186046512
 ------------------------------------------
 Training set size: 100
 Training SVC...
 Done!
-Training time (secs): 0.002
+Training time (secs): 0.003
 Predicting labels using SVC...
 Done!
-Prediction time (secs): 0.001
-F1 score for training set: 0.877419354839
+Prediction time (secs): 0.002
+F1 score for training set: 0.857142857143
 Predicting labels using SVC...
 Done!
-Prediction time (secs): 0.001
-F1 score for test set: 0.844720496894
+Prediction time (secs): 0.002
+F1 score for test set: 0.830985915493
 ------------------------------------------
 Training set size: 200
 Training SVC...
 Done!
-Training time (secs): 0.006
+Training time (secs): 0.007
 Predicting labels using SVC...
 Done!
-Prediction time (secs): 0.005
-F1 score for training set: 0.863787375415
+Prediction time (secs): 0.004
+F1 score for training set: 0.869841269841
 Predicting labels using SVC...
 Done!
 Prediction time (secs): 0.002
-F1 score for test set: 0.797297297297
+F1 score for test set: 0.8
 ------------------------------------------
 Training set size: 300
 Training SVC...
@@ -876,11 +876,11 @@ Training time (secs): 0.012
 Predicting labels using SVC...
 Done!
 Prediction time (secs): 0.009
-F1 score for training set: 0.852248394004
+F1 score for training set: 0.866379310345
 Predicting labels using SVC...
 Done!
 Prediction time (secs): 0.003
-F1 score for test set: 0.829931972789
+F1 score for test set: 0.832214765101
 </pre>
 </div>
 </div>
@@ -888,6 +888,114 @@ F1 score for test set: 0.829931972789
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<table>
+<thead><tr>
+<th>Decision Tree</th>
+<th style="text-align:center">Training time</th>
+<th style="text-align:center">Prediction time</th>
+<th style="text-align:center">F1 score training set</th>
+<th style="text-align:center">F1 score test set</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100 examples</td>
+<td style="text-align:center">0.002</td>
+<td style="text-align:center">0.000</td>
+<td style="text-align:center">1.0</td>
+<td style="text-align:center">0.728682170543</td>
+</tr>
+<tr>
+<td>200 examples</td>
+<td style="text-align:center">0.003</td>
+<td style="text-align:center">0.000</td>
+<td style="text-align:center">1.0</td>
+<td style="text-align:center">0.655462184874</td>
+</tr>
+<tr>
+<td>300 examples</td>
+<td style="text-align:center">0.004</td>
+<td style="text-align:center">0.000</td>
+<td style="text-align:center">1.0</td>
+<td style="text-align:center">0.761904761905</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead><tr>
+<th>GaussianNB</th>
+<th style="text-align:center">Training time</th>
+<th style="text-align:center">Prediction time</th>
+<th style="text-align:center">F1 score training set</th>
+<th style="text-align:center">F1 score test set</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100 examples</td>
+<td style="text-align:center">0.003</td>
+<td style="text-align:center">0.001</td>
+<td style="text-align:center">0.82962962963</td>
+<td style="text-align:center">0.752</td>
+</tr>
+<tr>
+<td>200 examples</td>
+<td style="text-align:center">0.002</td>
+<td style="text-align:center">0.001</td>
+<td style="text-align:center">0.790874524715</td>
+<td style="text-align:center">0.745762711864</td>
+</tr>
+<tr>
+<td>300 examples</td>
+<td style="text-align:center">0.002</td>
+<td style="text-align:center">0.001</td>
+<td style="text-align:center">0.807600950119</td>
+<td style="text-align:center">0.744186046512</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead><tr>
+<th>SVM</th>
+<th style="text-align:center">Training time</th>
+<th style="text-align:center">Prediction time</th>
+<th style="text-align:center">F1 score training set</th>
+<th style="text-align:center">F1 score test set</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>100 examples</td>
+<td style="text-align:center">0.003</td>
+<td style="text-align:center">0.002</td>
+<td style="text-align:center">0.857142857143</td>
+<td style="text-align:center">0.830985915493</td>
+</tr>
+<tr>
+<td>200 examples</td>
+<td style="text-align:center">0.007</td>
+<td style="text-align:center">0.004</td>
+<td style="text-align:center">0.869841269841</td>
+<td style="text-align:center">0.8</td>
+</tr>
+<tr>
+<td>300 examples</td>
+<td style="text-align:center">0.012</td>
+<td style="text-align:center">0.009</td>
+<td style="text-align:center">0.866379310345</td>
+<td style="text-align:center">0.832214765101</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
@@ -936,7 +1044,6 @@ F1 score for test set: 0.829931972789
 <li>General applications: classification, regression and outliers detection.</li>
 <li>Strengths:<ul>
 <li>Effective in high dimensional spaces.</li>
-<li>If the number of features is much greater than the number of samples, the method is likely to give poor performances.</li>
 <li>Still effective in cases where number of dimensions is greater than the number of samples.</li>
 <li>Uses a subset of training points in the decision function (called support vectors), so it is also memory efficient.</li>
 <li>Versatile: different Kernel functions can be specified for the decision function.</li>
@@ -949,7 +1056,7 @@ F1 score for test set: 0.829931972789
 </li>
 </ul>
 <h4 id="Given-what-you-know-about-the-data-so-far,-why-did-you-choose-this-model-to-apply?">Given what you know about the data so far, why did you choose this model to apply?<a class="anchor-link" href="#Given-what-you-know-about-the-data-so-far,-why-did-you-choose-this-model-to-apply?">&#182;</a></h4><ul>
-<li>I chose this model because it is effective in high dimensional spaces like our dataset and at the same time the number of dimensions of ourdataset is by far smaller than the number of our training set, which should erase the risk of poor performance due to too high dimensions with respect to size of sample. Moreover, it is a model known for memory efficiency, which is one of the constraints we have.</li>
+<li>I chose this model because it is effective in high dimensional spaces like our dataset and at the same time the number of dimensions of our dataset is by far smaller than the number of our training set, which should erase the risk of poor performance due to too high dimensions with respect to size of sample. Moreover, it is a model known for memory efficiency, which is one of the constraints we have.</li>
 </ul>
 <p>(Source: sklearn documentation)</p>
 
@@ -964,13 +1071,28 @@ F1 score for test set: 0.829931972789
 <h2 id="5.-Choosing-the-Best-Model">5. Choosing the Best Model<a class="anchor-link" href="#5.-Choosing-the-Best-Model">&#182;</a></h2><ul>
 <li>Based on the experiments you performed earlier, in 1-2 paragraphs explain to the board of supervisors what single model you chose as the best model. Which model is generally the most appropriate based on the available data, limited resources, cost, and performance?</li>
 </ul>
-<p>I chose the decision tree model because it provide some clearly understandable outline of the students who are likely to succeed and those who are likely to fail based on a set of objective parameters, the interdependencies among them and a reliable set of historical data made up of past students data. Given the limited resources available, my choice fell on a decision tree model rather than an SVM model because of the little time and memory it appears to take both for training and for predicting, while keeping some apparently decent performance.</p>
+<p>I chose the SVM model because it is the one that generalizes best. This can be observed by the fact that it is the model with the lowest difference in F1 score between training set and test set, which shows its robustness. Although the training time is substantially higher the others, I believe that the reliability of the results it produces is worth the extra cost, which stays within a reasonable range.</p>
 <ul>
 <li>In 1-2 paragraphs explain to the board of supervisors in layman's terms how the final model chosen is supposed to work (for example if you chose a Decision Tree or Support Vector Machine, how does it make a prediction).</li>
 </ul>
-<p>Let’s say you had to determine whether a home is in San Francisco or in New York. Since San Francisco is relatively hilly, the elevation of a home may be a good way to distinguish the two cities. you could argue that a home above 240 ft should be classified as one in San Francisco. Adding another dimension allows for more nuance. For example, New York apartments can be extremely expensive per square foot. Of course, you’ll need additional information to distinguish homes with lower elevations and lower per-square-foot prices.</p>
-<p>The point of a decision tree is to automate the process of categorizing whether our students are likely to belong to the set of those who succeed or to the set of those who fail. A decision tree automatically finds out the most relevant features and combinations of features that differentiate the students who succeed from those who fail.</p>
-<p>(Source for housing example: <a href="http://www.r2d3.us/visual-intro-to-machine-learning-part-1/">http://www.r2d3.us/visual-intro-to-machine-learning-part-1/</a>)</p>
+<p>We have 2 colors of balls on the table that we want to separate.</p>
+<p><a href="http://i.imgur.com/zDBbD.png">http://i.imgur.com/zDBbD.png</a></p>
+<p>We get a stick and put it on the table, this works pretty well right?</p>
+<p><a href="http://i.imgur.com/aLZlG.png">http://i.imgur.com/aLZlG.png</a></p>
+<p>Some villain comes and places more balls on the table, it kind of works but one of the balls is on the wrong side and there is probably a better place to put the stick now.</p>
+<p><a href="http://i.imgur.com/kxWgh.png">http://i.imgur.com/kxWgh.png</a></p>
+<p>SVMs try to put the stick in the best possible place by having as big a gap on either side of the stick as possible.</p>
+<p><a href="http://i.imgur.com/ePy4V.png">http://i.imgur.com/ePy4V.png</a></p>
+<p>Now when the villain returns the stick is still in a pretty good spot.</p>
+<p><a href="http://i.imgur.com/BWYYZ.png">http://i.imgur.com/BWYYZ.png</a></p>
+<p>There is another trick in the SVM toolbox that is even more important. Say the villain has seen how good you are with a stick so he gives you a new challenge.</p>
+<p><a href="http://i.imgur.com/R9967.png">http://i.imgur.com/R9967.png</a></p>
+<p>There’s no stick in the world that will let you split those balls well, so what do you do? You flip the table of course! Throwing the balls into the air. Then, with your pro ninja skills, you grab a sheet of paper and slip it between the balls.</p>
+<p><a href="http://i.imgur.com/WuxyO.png">http://i.imgur.com/WuxyO.png</a></p>
+<p>Now, looking at the balls from where the villain is standing, they balls will look split by some curvy line.</p>
+<p><a href="http://i.imgur.com/gWdPX.png">http://i.imgur.com/gWdPX.png</a></p>
+<p>Boring adults the call balls data, the stick a classifier, the biggest gap trick optimization, call flipping the table kernelling and the piece of paper a hyperplane.</p>
+<p>Source: <a href="https://www.reddit.com/r/MachineLearning/comments/15zrpp/please_explain_support_vector_machines_svm_like_i">https://www.reddit.com/r/MachineLearning/comments/15zrpp/please_explain_support_vector_machines_svm_like_i</a></p>
 <ul>
 <li>Fine-tune the model. Use Gridsearch with at least one important parameter tuned and with at least 3 settings. Use the entire training set for this.</li>
 <li>What is the model's final F<sub>1</sub> score?</li>
@@ -981,7 +1103,7 @@ F1 score for test set: 0.829931972789
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># TODO: Fine-tune your model and report the best F1 score</span>
@@ -995,9 +1117,8 @@ F1 score for test set: 0.829931972789
                                                                      <span class="n">train_size</span> <span class="o">=</span> <span class="n">num_train</span><span class="p">,</span>
                                                                      <span class="n">test_size</span> <span class="o">=</span> <span class="n">num_test</span><span class="p">)</span>
 
-
-<span class="n">clf</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">DecisionTreeClassifier</span><span class="p">()</span>
-<span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;max_depth&#39;</span><span class="p">:(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">10</span><span class="p">)}</span>
+<span class="n">clf</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">()</span>
+<span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;kernel&#39;</span><span class="p">:(</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;rbf&#39;</span><span class="p">),</span> <span class="s1">&#39;C&#39;</span><span class="p">:[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">]}</span>
 <span class="n">clf</span> <span class="o">=</span> <span class="n">grid_search</span><span class="o">.</span><span class="n">GridSearchCV</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
 <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="k">print</span> <span class="s2">&quot;Best parameters: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">clf</span><span class="o">.</span><span class="n">best_params_</span><span class="p">)</span>
@@ -1013,7 +1134,7 @@ F1 score for test set: 0.829931972789
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Best parameters: {&apos;max_depth&apos;: 1}
+<pre>Best parameters: {&apos;kernel&apos;: &apos;linear&apos;, &apos;C&apos;: 0.03}
 </pre>
 </div>
 </div>
@@ -1024,10 +1145,10 @@ F1 score for test set: 0.829931972789
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython2"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">max_depth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class=" highlight hl-ipython2"><pre><span></span><span class="n">clf</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">C</span><span class="o">=</span><span class="mf">0.03</span><span class="p">)</span>
 <span class="n">clf</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
 <span class="n">train_f1_score</span> <span class="o">=</span> <span class="n">predict_labels</span><span class="p">(</span><span class="n">clf</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
 <span class="k">print</span> <span class="s2">&quot;F1 score on test set: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">train_f1_score</span><span class="p">)</span>
@@ -1043,10 +1164,10 @@ F1 score for test set: 0.829931972789
 
 <div class="output_area"><div class="prompt"></div>
 <div class="output_subarea output_stream output_stdout output_text">
-<pre>Predicting labels using DecisionTreeClassifier...
+<pre>Predicting labels using SVC...
 Done!
-Prediction time (secs): 0.000
-F1 score on test set: 0.833333333333
+Prediction time (secs): 0.003
+F1 score on test set: 0.8625
 </pre>
 </div>
 </div>
