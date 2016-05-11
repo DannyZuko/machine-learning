@@ -3,6 +3,9 @@ import numpy as np
 import pandas as pd
 import renders as rs
 from IPython.display import display # Allows the use of display() for DataFrames
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
 
 # Show matplotlib plots inline (nicely formatted in the notebook)
 
@@ -32,9 +35,9 @@ new_data = data.drop(['Milk'], axis = 1)
 
 # TODO: Split the data into training and testing sets using the given feature as the target
 X_train, X_test, y_train, y_test = train_test_split(new_data,
-                                                                                                        data['Milk'],
-                                                                                                        test_size = 0.25,
-                                                                                                        random_state = 42)
+                                                    data['Milk'],
+                                                    test_size = 0.25,
+                                                    random_state = 42)
 
 # TODO: Create a decision tree regressor and fit it to the training set
 regressor = DecisionTreeRegressor()
@@ -72,8 +75,57 @@ for feature in log_data.keys():
     print "Data points considered outliers for the feature '{}':".format(feature)
     print log_data[~((log_data[feature] >= Q1 - step) & (log_data[feature] <= Q3 + step))]
     
-    # OPTIONAL: Select the indices for data points you wish to remove
-    outliers  = []
+# OPTIONAL: Select the indices for data points you wish to remove
+outliers  = []
     
-    # Remove the outliers, if any were specified
-    good_data = log_data.drop(log_data.index[outliers]).reset_index(drop = True)
+# Remove the outliers, if any were specified
+good_data = log_data.drop(log_data.index[outliers]).reset_index(drop = True)
+
+from sklearn.decomposition import PCA
+
+# TODO: Apply PCA to the good data with the same number of dimensions as features
+pca = PCA(n_components = 6)
+pca.fit(good_data)
+
+# TODO: Apply a PCA transformation to the sample log-data
+pca_samples = PCA(n_components = 6)
+pca_samples = pca.transform(log_samples)
+
+# Generate PCA results plot
+pca_results = rs.pca_results(good_data, pca)
+
+# TODO: Fit PCA to the good data using only two dimensions
+pca = PCA(n_components = 2)
+pca.fit(good_data)
+
+# TODO: Apply a PCA transformation the good data
+reduced_data = pca.transform(good_data)
+
+# TODO: Apply a PCA transformation to the sample log-data
+pca_samples = PCA(n_components = 2)
+pca_samples.fit(log_samples)
+pca_samples = pca_samples.transform(log_samples)
+
+# Create a DataFrame for the reduced data
+reduced_data = pd.DataFrame(reduced_data, columns = ['Dimension 1', 'Dimension 2'])
+
+n_clusters = 28
+scores = np.array([np.linspace(1, n_clusters, n_clusters), np.zeros(n_clusters)])
+
+for i in range(2, n_clusters):
+    # TODO: Apply your clustering algorithm of choice to the reduced data
+    clusterer = KMeans(n_clusters = i)
+    clusterer.fit(reduced_data)
+    
+    # TODO: Predict the cluster for each data point
+    preds = clusterer.predict(reduced_data)
+    
+    # TODO: Find the cluster centers
+    centers = clusterer.cluster_centers_
+    
+    # TODO: Predict the cluster for each transformed sample data point
+    sample_preds = clusterer.predict(pca_samples)
+    
+    # TODO: Calculate the mean silhouette coefficient for the number of clusters chosen
+    score = silhouette_score(reduced_data, preds)
+    scores[1][i] = scores
