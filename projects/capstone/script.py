@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn import preprocessing
+
 
 data = pd.read_csv('WIKI-AAPL.csv', index_col=0, parse_dates=True,
                    infer_datetime_format=True)
@@ -141,3 +143,113 @@ metrics_labels = ['final_pnl', 'avg_annual_return', 'annual_std', 'max_drawdown'
                   'omega_ratio']
 
 metrics = pd.DataFrame(metrics_values, metrics_labels, ['value'])
+
+# scale momentum values in order to have all values within range [-1; 1]
+# use MinMax scaler from sklearn on abs(momentum)
+# then multiply scaled values by sign(momentum) so that scaled values have same
+# sign as non-scaled values
+minmax_scaler = preprocessing.MinMaxScaler()
+
+momentum = data['adj_close'] / data['adj_close'].shift(5) - 1
+momentum = pd.DataFrame(momentum)
+momentum.columns = ['momentum']
+data = data.join(momentum)
+
+momentum_dropna = momentum.dropna()
+scaled_momentum = minmax_scaler.fit_transform(abs(momentum_dropna)) * \
+                  np.sign(momentum_dropna) 
+
+volumes = data['adj_volume']
+volumes = pd.DataFrame(volumes)
+scaled_volumes = minmax_scaler.fit_transform(volumes)
+
+momentum_by_volume = momentum * volumes.values
+momentum_by_volume.columns = ['momentum_by_volume']
+data = data.join(momentum_by_volume)
+
+scaled_momentum_by_volume = \
+minmax_scaler.fit_transform(momentum_by_volume.dropna()) 
+
+
+plt.boxplot(data['daily_returns'].dropna().values,
+	    vert=False,
+	    labels=['daily_returns'],
+	    showmeans=True)
+plt.title('Box-and-whisker plot of daily returns including all outliers')
+
+
+plt.boxplot(momentum.dropna().values,
+	    vert=False,
+	    labels=['momentum'],
+	    showmeans=True)
+plt.title('Box-and-whisker plot of momentum including all outliers')
+
+
+plt.boxplot(volumes.values,
+	    vert=False,
+	    labels=['volumes'],
+	    showmeans=True)
+plt.title('Box-and-whisker plot of volumes including all outliers')
+
+
+plt.boxplot(np.log(volumes).values,
+	    vert=False,
+	    labels=['log_volumes'],
+	    showmeans=True)
+plt.title('Box-and-whisker plot of log(volumes) including all outliers')
+
+
+plt.boxplot(momentum_by_volume.dropna().values,
+	    vert=False,
+	    labels=['momentum_by_volume'],
+	    showmeans=True)
+plt.title('Box-and-whisker plot of momentum_by_volume including all outliers')
+
+# maybe want to plot momentum * log(volumes) ?
+
+
+plt.hist(data['daily_returns'].dropna().values, bins=200, histtype='stepfilled')
+plt.xlabel('daily_returns')
+plt.ylabel('N. of observations')
+plt.title('Histogram of daily_returns distribution')
+
+
+plt.hist(momentum.dropna().values, bins=200, histtype='stepfilled')
+plt.xlabel('momentum')
+plt.ylabel('N. of observations')
+plt.title('Histogram of momentum distribution')
+
+
+plt.hist(volumes.values, bins=500, histtype='stepfilled')
+plt.xlabel('volumes')
+plt.ylabel('N. of observations')
+plt.title('Histogram of volume distribution')
+
+
+plt.hist(np.log(volumes).values, bins=500, histtype='stepfilled')
+plt.xlabel('volumes')
+plt.ylabel('N. of observations')
+plt.title('Histogram of volume distribution')
+
+
+plt.hist(momentum_by_volume.dropna().values, bins=1000, histtype='stepfilled')
+plt.xlabel('momentum_by_volume')
+plt.ylabel('N. of observations')
+plt.title('Histogram of momentum_by_volume distribution')
+
+
+delta_volume = data['adj_volume'] / data['adj_volume'].shift(1) - 1
+delta_volume = pd.DataFrame(delta_volume)
+plt.hist(delta_volume.dropna().values, bins = 1000)
+
+
+
+pd.scatter_matrix(data, alpha = 0.3, figsize = (14,8), diagonal = 'kde')
+
+subset = data.loc[:, ['adj_volume',
+                      'daily_returns',
+                      'momentum',
+                      'momentum_by_volume']] 
+
+pd.scatter_matrix(subset, alpha = 0.3, figsize = (14,8), diagonal = 'kde')
+# explain why excluding columns from scatter matrix
