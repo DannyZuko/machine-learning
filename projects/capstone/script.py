@@ -246,10 +246,63 @@ plt.hist(delta_volume.dropna().values, bins = 1000)
 
 pd.scatter_matrix(data, alpha = 0.3, figsize = (14,8), diagonal = 'kde')
 
-subset = data.loc[:, ['adj_volume',
-                      'daily_returns',
-                      'momentum',
-                      'momentum_by_volume']] 
+data_subset = data.loc[:, ['adj_volume',
+                           'daily_returns',
+                           'momentum',
+                           'momentum_by_volume']] 
 
-pd.scatter_matrix(subset, alpha = 0.3, figsize = (14,8), diagonal = 'kde')
+pd.scatter_matrix(data_subset, alpha = 0.3, figsize = (14,8), diagonal = 'kde')
+
 # explain why excluding columns from scatter matrix
+
+
+def summary(df):
+    '''Provide summary of relevant statistics for some given feature'''
+    
+    df = df.iloc[:, 0]
+    n_obs = df.count()
+    mean = df.mean()
+    median = df.median()
+    std = df.std()
+    skew = df.skew()
+    kurt = df.kurt()
+    min = df.min()
+    argmin = df.argmin()
+    max = df.max()
+    argmax = df.argmax()
+    q3, q1 = np.percentile(df.dropna(), [75, 25])
+    iqr = q3 - q1
+    outlier_lb = q1 - iqr * 1.5
+    outlier_ub = q3 + iqr * 1.5
+    major_outlier_lb = q1 - iqr * 3
+    major_outlier_ub = q3 + iqr * 3
+    is_outlier = (df.dropna() < outlier_lb) | (df.dropna() > outlier_ub)
+    is_major_outlier = (df.dropna() < major_outlier_lb) | \
+                       (df.dropna() > major_outlier_ub) 
+    n_outliers = is_outlier.sum()
+    n_major_outliers = is_major_outlier.sum()
+    n_minor_outliers = n_outliers - n_major_outliers
+
+    values = [mean, median, std, skew, kurt, min, argmin, max, argmax, q1, q3,
+              iqr, outlier_lb, outlier_ub, major_outlier_lb, major_outlier_ub,
+              n_obs, n_outliers, n_major_outliers, n_minor_outliers] 
+
+    labels = ['mean', 'median', 'std', 'skew', 'kurt', 'min', 'argmin', 'max',
+              'argmax', 'q1', 'q3', 'iqr', 'outlier_lb', 'outlier_ub',
+              'major_outlier_lb', 'major_outlier_ub', 'n_obs', 'n_outliers',
+              'n_major_outliers', 'n_minor_outliers']
+
+    summary = pd.Series(values, labels)
+
+    return summary
+    
+
+def remove_outliers(df, coeff=1.5):
+    df = df.dropna()
+    q3, q1 = np.percentile(df, [75, 25])
+    iqr = q3 - q1
+    outlier_lb = q1 - iqr * coeff
+    outlier_ub = q3 + iqr * coeff
+    is_not_outlier = (df > outlier_lb) & (df < outlier_ub)
+
+    return df[is_not_outlier].dropna()
