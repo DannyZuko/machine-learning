@@ -371,7 +371,7 @@ def prune_outliers(df, coeff=1.5):
 
 
 # generate list of training and test sets
-def generate_sets(features, window_size=90, step_size=6):
+def generate_sets(features, window_size=90, step_size=6, prune_coeff=1.5):
     training_sets = []
     test_sets = []
     is_greater_than_window = mondays(features.index) > \
@@ -386,21 +386,49 @@ def generate_sets(features, window_size=90, step_size=6):
         # slice test window
         test_window_end = monday + timedelta(days=step_size)
         test_window = features.loc[monday:test_window_end]
-        # prune outliers
-        train_window = prune_outliers(train_window)
-        test_window = prune_outliers(test_window)
+        # prune outliers in training window
+        train_window = prune_outliers(train_window, prune_coeff)
+	# prune outliers in test window
+        # this can't be done by using prune_outliers function because this
+        # function computes the function based on the dataset it is given
+        # the problem with this is that - when it comes to outliers detection -
+        # we would rather treat the test set as an extension of the training
+        # set since at the time of decision making not all values of the test
+        # set are known
+        # therefore we substitute all values in test set greater than
+        # max of pruned training set with max of pruned training set
+        # itself instead of some computed upper bound on the  test set
+        is_to_prune = test_window > train_window.max()
+        # invert sign of is_to_prune to subset values to leave unchanged
+	is_not_to_prune = abs(is_to_prune - 1)
+        # create dataframe of same dimension as test window containing
+        # pruned outliers and zeros everywhere else
+        pruned_outliers = is_to_prune * train_window.max()
+        # create dataframe of same dimension as test window containing
+        # non outliers and zeros intead of outliers
+	non_outliers = is_not_to_prune * test_window
+        # obtain test window with pruned outliers by summing non_outliers and
+        # pruned_outliers  
+	test_window = non_outliers + pruned_outliers
         # normalize features
         train_window_values = minmax_scaler.fit_transform(train_window)
         train_window = pd.DataFrame(train_window_values,
                                     train_window.index,
                                     train_window.columns)
-        test_window_values = minmax_scaler.fit_transform(test_window)
+        # for the same reason explained above, we can't normalize the test set
+        # data on their own, but rather as if they were part of the training set
+        # for this reason, we implement the minmax scaler manually subtracting
+        # min of training from each value of test_window and dividing by range
+        # of training set (max - min)
+        test_window_values = (test_window - train_window.min()) / \
+                             (train_window.max() - train_window.min())
         test_window = pd.DataFrame(test_window_values,
                                    test_window.index,
                                    test_window.columns)
         training_sets.append(train_window)
         test_sets.append(test_window)
     return training_sets, test_sets
+
 
 X_trains, X_tests = generate_sets(features.dropna())
 
@@ -437,7 +465,8 @@ def run_model(model, X_trains, X_tests, ys):
         model.fit(X_train, y)
         y_true = ys[X_test.index].values
         y_pred = model.predict(X_test)
-        window_pnl = y_pred * X_test['daily_returns']
+        actual_returns = features['daily_returns'].loc[X_test.index]
+        window_pnl = y_pred * actual_returns
 	accuracy = metrics.accuracy_score(y_true, y_pred)
         accuracies.append(accuracy)
 	accuracies_ix.append(X_test.index[0])
@@ -578,7 +607,9 @@ def generate_sets(features, window_size=90, step_size=6):
         # therefore we substitute all values in test set greater than
         # max of pruned training set with max of pruned training set
         # itself instead of some computed upper bound on the  test set
-        test_window[test_window > train_window.max()] = train_window.max() 
+        is_to_prune = test_window > train_window.max()
+        pruned_outliers = is_to_prune * train_window.max() 
+        test_window[is_to_prune] = pruned_outliers
         # normalize features
         train_window_values = minmax_scaler.fit_transform(train_window)
         train_window = pd.DataFrame(train_window_values,
@@ -597,3 +628,14 @@ def generate_sets(features, window_size=90, step_size=6):
         training_sets.append(train_window)
         test_sets.append(test_window)
     return training_sets, test_sets
+
+
+test_window = features.loc[X_tests[1201].index]
+train_window = features.loc[X_trains[1201].index]
+test_window.iloc[3,3] = 1
+test_window.iloc[1,1] = 1
+is_to_prune = test_window > train_window.max()
+is_not_to_prune = abs(is_to_prune - 1)
+pruned_outliers = is_to_prune * train_window.max()
+non_outliers = is_not_to_prune * test_window
+test_window = non_outliers + pruned_outliers
