@@ -1,8 +1,10 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn import preprocessing
-
+from sklearn import preprocessing, metrics, linear_model, svm, neighbors
+# from sklearn import metrics
+# from sklearn import linear_model
+from datetime import timedelta
 
 data = pd.read_csv('WIKI-AAPL.csv', index_col=0, parse_dates=True,
                    infer_datetime_format=True)
@@ -142,7 +144,7 @@ metrics_labels = ['final_pnl', 'avg_annual_return', 'annual_std', 'max_drawdown'
                   'sterling_ratio', 'adjusted_sterling_ratio', 'calmar_ratio',
                   'omega_ratio']
 
-metrics = pd.DataFrame(metrics_values, metrics_labels, ['value'])
+metrics_df = pd.DataFrame(metrics_values, metrics_labels, ['value'])
 
 # scale momentum values in order to have all values within range [-1; 1]
 # use MinMax scaler from sklearn on abs(momentum)
@@ -298,11 +300,300 @@ def summary(df):
     
 
 def remove_outliers(df, coeff=1.5):
-    df = df.dropna()
-    q3, q1 = np.percentile(df, [75, 25])
-    iqr = q3 - q1
-    outlier_lb = q1 - iqr * coeff
-    outlier_ub = q3 + iqr * coeff
-    is_not_outlier = (df > outlier_lb) & (df < outlier_ub)
 
-    return df[is_not_outlier].dropna()
+    result = pd.DataFrame(index=df.index)
+    columns = range(0, df.shape[1])
+
+    for i in columns:
+        column = df[[i]].dropna()
+        q3, q1 = np.percentile(column, [75, 25])
+        iqr = q3 - q1
+        outlier_lb = q1 - iqr * coeff
+        outlier_ub = q3 + iqr * coeff
+        is_not_outlier = (column > outlier_lb) & (column < outlier_ub)
+        result = result.join(column[is_not_outlier])
+
+    return result.dropna()
+
+
+# subset features to determine outliers
+subset = data[['adj_volume', 'momentum', 'daily_returns']]
+
+# generate indexes to create datasets
+no_outliers_ix = remove_outliers(subset).index
+no_major_outliers_ix = remove_outliers(subset, 3).index
+with_outliers_ix = subset.dropna().index
+
+# create master dataset
+features = data[['adj_volume',
+                 'momentum',
+                 'momentum_by_volume',
+                 'daily_returns']]
+
+# build dataset based on previously generated indexes
+no_outliers = features.loc[no_outliers_ix]
+no_major_outliers = features.loc[no_major_outliers_ix]
+with_outliers = features.loc[with_outliers_ix]
+
+# receive array of dates, return respective day of week
+# 0 for monday, 1 for tuesday, ... , 6 for sunday
+def weekdays(dates): 
+    weekdays = []
+    for date in dates: weekdays.append(date.weekday())
+    return np.array(weekdays)
+
+# return true if date in array is monday, false otherwise
+def mondays(dates):
+    mondays = dates[weekdays(dates) == 0]
+    return mondays
+
+# substitute outliers above upper bound with upper bound value and outliers
+# below lower bound with lower bound value
+# the purpose of this is to not let wild outliers to screw the rest of the data
+# by making it to take too small values 
+def prune_outliers(df, coeff=1.5):
+    result = pd.DataFrame(index=df.index)
+    columns = range(0, df.shape[1])
+    for i in columns:
+        column = df[[i]].dropna()
+        q3, q1 = np.percentile(column, [75, 25])
+        iqr = q3 - q1
+        outlier_lb = q1 - iqr * coeff
+        outlier_ub = q3 + iqr * coeff
+	is_below_lb = column < outlier_lb
+	is_above_ub = column > outlier_ub
+	# prune outliers by setting them equal to respectively lower or upper
+	# bound 
+	column[is_below_lb] = outlier_lb
+	column[is_above_ub] = outlier_ub
+     	result = result.join(column)
+    return result.dropna()
+
+
+# generate list of training and test sets
+def generate_sets(features, window_size=90, step_size=6):
+    training_sets = []
+    test_sets = []
+    is_greater_than_window = mondays(features.index) > \
+                             (mondays(features.index)[0] +
+                              timedelta(days=window_size))
+    mondays_range = mondays(features.index)[is_greater_than_window] 
+    for monday in mondays_range:
+        # slice training window
+        train_window_start = monday - timedelta(days=window_size)
+        train_window_end = monday - timedelta(days=1)
+        train_window = features.loc[train_window_start:train_window_end]
+        # slice test window
+        test_window_end = monday + timedelta(days=step_size)
+        test_window = features.loc[monday:test_window_end]
+        # prune outliers
+        train_window = prune_outliers(train_window)
+        test_window = prune_outliers(test_window)
+        # normalize features
+        train_window_values = minmax_scaler.fit_transform(train_window)
+        train_window = pd.DataFrame(train_window_values,
+                                    train_window.index,
+                                    train_window.columns)
+        test_window_values = minmax_scaler.fit_transform(test_window)
+        test_window = pd.DataFrame(test_window_values,
+                                   test_window.index,
+                                   test_window.columns)
+        training_sets.append(train_window)
+        test_sets.append(test_window)
+    return training_sets, test_sets
+
+X_trains, X_tests = generate_sets(features.dropna())
+
+# label based on sign the the return on the following day
+labels = np.sign(features['daily_returns'].shift(-1))
+# choose regressor
+logreg = linear_model.LogisticRegression()
+# fit regressor with 42nd X and y, just as an example to test 
+logreg.fit(X_trains[42], labels[X_trains[42].index])
+# subset labels for 42nd test set
+y_true = labels[X_tests[42].index].values
+# predict labels for 42nd test set
+y_pred = logreg.predict(X_tests[42])
+# compute PnL of the window by calculating y_pred (-1, 0 or 1) times the actual
+# return of the given day
+window_pnl = np.sum(y_pred * X_tests[42]['daily_returns'])
+# compute accuracy, precision, recall and f1 measures
+accuracy = metrics.accuracy_score(y_true, y_pred)
+precision = metrics.precision_score(y_true, y_pred)
+recall = metrics.recall_score(y_true, y_pred)
+f1 = metrics.f1_score(y_true, y_pred)
+
+# function takes as input a model, a list of training sets, a list of test sets
+# and the labels
+def run_model(model, X_trains, X_tests, ys):
+    model = model
+    accuracies = []
+    accuracies_ix = []
+    pnl = []
+    for i in range(13, len(X_trains)):
+        X_train = X_trains[i]
+        X_test = X_tests[i]
+        y = ys[X_train.index]
+        model.fit(X_train, y)
+        y_true = ys[X_test.index].values
+        y_pred = model.predict(X_test)
+        window_pnl = y_pred * X_test['daily_returns']
+	accuracy = metrics.accuracy_score(y_true, y_pred)
+        accuracies.append(accuracy)
+	accuracies_ix.append(X_test.index[0])
+	pnl.append(window_pnl)
+    accuracies = pd.DataFrame(accuracies, accuracies_ix, ['accuracy'])
+    pnl = pd.DataFrame(pd.concat(pnl))
+    pnl.columns = ['pnl']
+#    summary = pd.DataFrame([accuracies.mean()[0], pnl.sum()[0]],
+#			   columns=['summary'],
+#			   index=['avg_accuracy', 'final_pnl'])
+    return accuracies, pnl
+
+# run logistic regression 
+accuracy_lr, pnl_lr = run_model(linear_model.LogisticRegression(),
+                                X_trains,
+                                X_tests,
+                                labels) 
+
+# plot graph of cumulative profits with logistic regression model
+plt.plot(np.cumsum(pnl_lr))
+
+
+# run support vector machines
+accuracy_svm, pnl_svm = run_model(svm.SVC(),
+                                  X_trains,
+                                  X_tests,
+                                  labels) 
+
+# plot graph of cumulative profits with logistic regression model
+plt.plot(np.cumsum(pnl_svm))
+
+
+# run nearest neighbor classifier
+accuracy_knn, pnl_knn = run_model(neighbors.KNeighborsClassifier(),
+                                  X_trains,
+                                  X_tests,
+                                  labels) 
+
+# plot graph of cumulative profits with logistic regression model
+plt.plot(np.cumsum(pnl_knn))
+
+
+# compute ensemble pnl
+pnl_ensemble = (pnl_lr + pnl_svm + pnl_knn) / 3
+
+# plot graph of cumulative profits with ensemble model
+plt.plot(np.cumsum(pnl_ensemble))
+
+def evaluate(pnl):
+    pnl = pnl.iloc[:, 0]
+    final_pnl = pnl.sum()
+    print final_pnl
+    # avg annual return = avg daily return * number of trading days in a year
+    avg_annual_return = pnl.mean() * 252
+    # avg annual std = daily std * sqrt(number of trading days in a year)
+    # we take the sqrt because
+    # std = sqrt(variance)
+    # annual variance = daily variance * 252
+    # annual std = sqrt(annual variance)
+    #            = sqrt(daily variance * 252)
+    #            = sqrt(daily variance) * sqrt(252)
+    #            = daily std * sqrt(252)
+    annual_std = pnl.std() * np.sqrt(252)
+    cum_ret = np.cumsum(pnl)
+    drawdowns = np.maximum.accumulate(cum_ret) - cum_ret
+    max_drawdown_valley = np.argmax(drawdowns)
+    print max_drawdown_valley
+    max_drawdown_peak = np.argmax(cum_ret[:max_drawdown_valley])
+    max_drawdown = np.max(drawdowns)
+    avg_drawdown = np.mean(drawdowns)
+    median_drawdown = np.median(drawdowns)
+    q3_drawdown = np.percentile(drawdowns, 75)
+    # remember to compute recovery time from drawdowns
+    # risk-adjusted return measures
+    # all such measures are annualized here
+    # information ratio = sharpe ratio without taking risk-free rate into account
+    # using Narang's definition here, not Balch's - hence ignoring beta
+    information_ratio = avg_annual_return / annual_std
+    # sterling ratio = avg return / std of below average returns
+    below_avg_returns = pnl[pnl < pnl.mean()]
+    annual_below_avg_returns_std = below_avg_returns.std() * np.sqrt(252)
+    sterling_ratio = avg_annual_return / annual_below_avg_returns_std
+    # sterling_ratio = sterling_ratio.values[0]
+    # adjusted sterling ratio = avg return / std of negative returns
+    negative_returns = pnl[pnl < 0]
+    annual_negative_returns_std = negative_returns.std() * np.sqrt(252)
+    adjusted_sterling_ratio = avg_annual_return / annual_negative_returns_std
+    # adjusted_sterling_ratio = adjusted_sterling_ratio.values[0] 
+    calmar_ratio = avg_annual_return / max_drawdown
+    # omega ratio = sum of all positive returns / sum of all negative returns
+    positive_returns = pnl[pnl > 0]
+    omega_ratio = positive_returns.sum() / np.abs(negative_returns.sum())
+    # omega_ratio = omega_ratio.values[0]
+    metrics_values = [final_pnl, avg_annual_return, annual_std, max_drawdown,
+                      avg_drawdown, median_drawdown, information_ratio,
+                      sterling_ratio, adjusted_sterling_ratio, calmar_ratio,
+                      omega_ratio]
+    metrics_labels = ['final_pnl', 'avg_annual_return', 'annual_std',
+                      'max_drawdown', 'avg_drawdown', 'median_drawdown',
+                      'information_ratio', 'sterling_ratio',
+                      'adjusted_sterling_ratio', 'calmar_ratio', 'omega_ratio']
+    metrics_df = pd.DataFrame(metrics_values, metrics_labels, ['value'])
+    return metrics_df
+
+
+features_norm_values = minmax_scaler.fit_transform(features.dropna())
+features_norm_index = features.dropna().index
+features_norm = pd.DataFrame(features_norm_values,
+                             features_norm_index,
+                             features.columns)
+
+
+
+def generate_sets(features, window_size=90, step_size=6):
+    training_sets = []
+    test_sets = []
+    is_greater_than_window = mondays(features.index) > \
+                             (mondays(features.index)[0] +
+                              timedelta(days=window_size))
+    mondays_range = mondays(features.index)[is_greater_than_window] 
+    for monday in mondays_range:
+        # slice training window
+        train_window_start = monday - timedelta(days=window_size)
+        train_window_end = monday - timedelta(days=1)
+        train_window = features.loc[train_window_start:train_window_end]
+        # slice test window
+        test_window_end = monday + timedelta(days=step_size)
+        test_window = features.loc[monday:test_window_end]
+        # prune outliers in training window
+        train_window = prune_outliers(train_window)
+	# prune outliers in test window
+        # this can't be done by using prune_outliers function because this
+        # function computes the function based on the dataset it is given
+        # the problem with this is that - when it comes to outliers detection -
+        # we would rather treat the test set as an extension of the training
+        # set since at the time of decision making not all values of the test
+        # set are known
+        # therefore we substitute all values in test set greater than
+        # max of pruned training set with max of pruned training set
+        # itself instead of some computed upper bound on the  test set
+        test_window[test_window > train_window.max()] = train_window.max() 
+        # normalize features
+        train_window_values = minmax_scaler.fit_transform(train_window)
+        train_window = pd.DataFrame(train_window_values,
+                                    train_window.index,
+                                    train_window.columns)
+        # for the same reason explained above, we can't normalize the test set
+        # data on their own, but rather as if they were part of the training set
+        # for this reason, we implement the minmax scaler manually subtracting
+        # min of training from each value of test_window and dividing by range
+        # of training set (max - min)
+        test_window_values = (test_window - train_window.min()) / \
+                             (train_window.max() - train_window.min())
+        test_window = pd.DataFrame(test_window_values,
+                                   test_window.index,
+                                   test_window.columns)
+        training_sets.append(train_window)
+        test_sets.append(test_window)
+    return training_sets, test_sets
