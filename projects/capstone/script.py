@@ -495,7 +495,7 @@ accuracy_svm, pnl_svm = run_model(svm.SVC(),
                                   X_tests,
                                   labels) 
 
-# plot graph of cumulative profits with logistic regression model
+# plot graph of cumulative profits with support vector machine model
 plt.plot(np.cumsum(pnl_svm))
 
 
@@ -505,7 +505,7 @@ accuracy_knn, pnl_knn = run_model(neighbors.KNeighborsClassifier(),
                                   X_tests,
                                   labels) 
 
-# plot graph of cumulative profits with logistic regression model
+# plot graph of cumulative profits with nearest neighbors model
 plt.plot(np.cumsum(pnl_knn))
 
 
@@ -578,7 +578,15 @@ features_norm = pd.DataFrame(features_norm_values,
                              features_norm_index,
                              features.columns)
 
-
+test_window = features.loc[X_tests[1201].index]
+train_window = features.loc[X_trains[1201].index]
+test_window.iloc[3,3] = 1
+test_window.iloc[1,1] = 1
+is_to_prune = test_window > train_window.max()
+is_not_to_prune = abs(is_to_prune - 1)
+pruned_outliers = is_to_prune * train_window.max()
+non_outliers = is_not_to_prune * test_window
+test_window = non_outliers + pruned_outliers
 
 def generate_sets(features, window_size=90, step_size=6):
     training_sets = []
@@ -595,8 +603,35 @@ def generate_sets(features, window_size=90, step_size=6):
         # slice test window
         test_window_end = monday + timedelta(days=step_size)
         test_window = features.loc[monday:test_window_end]
-        # prune outliers in training window
-        train_window = prune_outliers(train_window)
+        # append training window to training_sets list
+        training_sets.append(train_window)
+        # append test window to test_sets list
+        test_sets.append(test_window)
+    return training_sets, test_sets
+
+def prune_training_outliers(df, coeff=1.5):
+    result = pd.DataFrame(index=df.index)
+    columns = range(0, df.shape[1])
+    for i in columns:
+        column = df[[i]].dropna()
+        q3, q1 = np.percentile(column, [75, 25])
+        iqr = q3 - q1
+        outlier_lb = q1 - iqr * coeff
+        outlier_ub = q3 + iqr * coeff
+	is_below_lb = column < outlier_lb
+	is_above_ub = column > outlier_ub
+	# prune outliers by setting them equal to respectively lower or upper
+	# bound 
+	column[is_below_lb] = outlier_lb
+	column[is_above_ub] = outlier_ub
+     	result = result.join(column)
+    return result.dropna()
+
+
+def prune_outliers(training_sets, test_sets, prune_coeff=1.5):
+    for i in range(0, len(training_sets)):
+        training_sets[i] = prune_training_outliers(training_sets[i],
+                                                   prune_coeff) 
 	# prune outliers in test window
         # this can't be done by using prune_outliers function because this
         # function computes the function based on the dataset it is given
@@ -608,8 +643,17 @@ def generate_sets(features, window_size=90, step_size=6):
         # max of pruned training set with max of pruned training set
         # itself instead of some computed upper bound on the  test set
         is_to_prune = test_window > train_window.max()
-        pruned_outliers = is_to_prune * train_window.max() 
-        test_window[is_to_prune] = pruned_outliers
+        # invert sign of is_to_prune to subset values to leave unchanged
+	is_not_to_prune = abs(is_to_prune - 1)
+        # create dataframe of same dimension as test window containing
+        # pruned outliers and zeros everywhere else
+        pruned_outliers = is_to_prune * train_window.max()
+        # create dataframe of same dimension as test window containing
+        # non outliers and zeros intead of outliers
+	non_outliers = is_not_to_prune * test_window
+        # obtain test window with pruned outliers by summing non_outliers and
+        # pruned_outliers  
+	test_window = non_outliers + pruned_outliers
         # normalize features
         train_window_values = minmax_scaler.fit_transform(train_window)
         train_window = pd.DataFrame(train_window_values,
@@ -629,13 +673,3 @@ def generate_sets(features, window_size=90, step_size=6):
         test_sets.append(test_window)
     return training_sets, test_sets
 
-
-test_window = features.loc[X_tests[1201].index]
-train_window = features.loc[X_trains[1201].index]
-test_window.iloc[3,3] = 1
-test_window.iloc[1,1] = 1
-is_to_prune = test_window > train_window.max()
-is_not_to_prune = abs(is_to_prune - 1)
-pruned_outliers = is_to_prune * train_window.max()
-non_outliers = is_not_to_prune * test_window
-test_window = non_outliers + pruned_outliers
