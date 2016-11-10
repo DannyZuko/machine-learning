@@ -609,6 +609,7 @@ def generate_sets(features, window_size=90, step_size=6):
         test_sets.append(test_window)
     return training_sets, test_sets
 
+
 def prune_training_outliers(df, coeff=1.5):
     result = pd.DataFrame(index=df.index)
     columns = range(0, df.shape[1])
@@ -629,47 +630,61 @@ def prune_training_outliers(df, coeff=1.5):
 
 
 def prune_outliers(training_sets, test_sets, prune_coeff=1.5):
+    pruned_training_sets = []
+    pruned_test_sets = []
     for i in range(0, len(training_sets)):
-        training_sets[i] = prune_training_outliers(training_sets[i],
-                                                   prune_coeff) 
+        train_window = training_sets[i]
+        test_window = test_sets[i]
+        train_window = prune_training_outliers(training_sets[i],
+                                               prune_coeff) 
 	# prune outliers in test window
-        # this can't be done by using prune_outliers function because this
-        # function computes the function based on the dataset it is given
-        # the problem with this is that - when it comes to outliers detection -
-        # we would rather treat the test set as an extension of the training
-        # set since at the time of decision making not all values of the test
-        # set are known
-        # therefore we substitute all values in test set greater than
-        # max of pruned training set with max of pruned training set
-        # itself instead of some computed upper bound on the  test set
-        is_to_prune = test_window > train_window.max()
+        # we treat the test set as an extension of the training set since at the
+        # time of decision making not all values of the test set are known
+        # therefore we substitute all values in test set smaller than min or
+        # greater than max of pruned training set with max of pruned training
+        # set itself instead of some computed upper bound on the test set
+        is_to_prune_left = test_window < train_window.min()
+        is_to_prune_right = test_window > train_window.max()
+        is_to_prune = is_to_prune_left | is_to_prune_right
         # invert sign of is_to_prune to subset values to leave unchanged
 	is_not_to_prune = abs(is_to_prune - 1)
         # create dataframe of same dimension as test window containing
         # pruned outliers and zeros everywhere else
-        pruned_outliers = is_to_prune * train_window.max()
+        pruned_left = is_to_prune_left * train_window.min()
+        pruned_right = is_to_prune_right * train_window.max()
         # create dataframe of same dimension as test window containing
         # non outliers and zeros intead of outliers
 	non_outliers = is_not_to_prune * test_window
         # obtain test window with pruned outliers by summing non_outliers and
         # pruned_outliers  
-	test_window = non_outliers + pruned_outliers
-        # normalize features
-        train_window_values = minmax_scaler.fit_transform(train_window)
-        train_window = pd.DataFrame(train_window_values,
-                                    train_window.index,
-                                    train_window.columns)
-        # for the same reason explained above, we can't normalize the test set
-        # data on their own, but rather as if they were part of the training set
-        # for this reason, we implement the minmax scaler manually subtracting
-        # min of training from each value of test_window and dividing by range
-        # of training set (max - min)
+	test_window = non_outliers + pruned_left + pruned_right
+        pruned_training_sets.append(train_window)
+        pruned_test_sets.append(test_window)
+    return pruned_training_sets, pruned_test_sets
+
+
+# scale list of training and test sets
+def scale_features(training_sets, test_sets):
+    scaled_training_sets = []
+    scaled_test_sets = []
+    for i in range(0, len(training_sets)):
+        train_window = training_sets[i]
+        test_window = test_sets[i]
+        # since we don't want to normalize the test set data on their own, but
+        # rather as if they were part of the training set, we implement the 
+        # minmax scaler manually subtracting min of training from each value of
+        # test_window and dividing by range of training set (max - min)
         test_window_values = (test_window - train_window.min()) / \
                              (train_window.max() - train_window.min())
         test_window = pd.DataFrame(test_window_values,
                                    test_window.index,
                                    test_window.columns)
-        training_sets.append(train_window)
-        test_sets.append(test_window)
-    return training_sets, test_sets
-
+        # we normalize test window before training window otherwise min and max
+        # values from training window used to scale test window would be 0 and 1
+        train_window_values = minmax_scaler.fit_transform(train_window)
+        train_window = pd.DataFrame(train_window_values,
+                                    train_window.index,
+                                    train_window.columns)
+        scaled_training_sets.append(train_window)
+        scaled_test_sets.append(test_window)
+    return scaled_training_sets, scaled_test_sets
